@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdio.h>
 
 #include "memory.h"
 #include "common.h"
@@ -38,6 +39,12 @@ mem_set(int off, uint8_t val)
                 dbg_err("[memory.c: mem_set] memory offset out of bound");
 
         g_memory[off] = val;
+}
+
+void
+mem_load(FILE *f_ptr, long f_size)
+{
+        fread(&g_memory[PROGRAM_START], sizeof(uint8_t), f_size, f_ptr);
 }
 
 /* DEBUG & TEST ONLY USE */

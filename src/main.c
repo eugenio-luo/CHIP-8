@@ -18,6 +18,11 @@ main(int argc, char **argv)
         dbg_test_init();
 #endif
         
-        if (sys_load(argv[1]))
-                dbg_err("[main.c: main] program loading failed");
+        sys_load(argv[1]);
+
+#ifdef TEST
+        dbg_test_load();
+#endif
+
+        sys_cycle();
 }

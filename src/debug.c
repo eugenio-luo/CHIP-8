@@ -7,6 +7,7 @@
 #include "memory.h"
 #include "registers.h"
 #include "common.h"
+#include "stack.h"
 
 #define RED "\033[0;31m"
 #define GREEN "\033[0;32m"
@@ -77,6 +78,27 @@ dbg_test(void)
         /* #1.3: set and get register */
         reg_set(REGS_COUNT - 1, 1);
         TEST_CHECK(2, 3, reg_get(REGS_COUNT - 1) == 1);
+
+        /* #3 STACK */
+
+        /* #3.1: try to overflow stack */
+        for (int i = 0; i < (STACK_SIZE + 1); ++i)
+                stc_push(1);
+        TEST_CHECK(3, 1, err_code);
+        stc_reset();
+
+        /* #3.2: try to underflow stack */
+        stc_pop();
+        TEST_CHECK(3, 2, err_code);
+        stc_reset();
+
+        /* #3.3: push, check value */
+        stc_push(1);
+        TEST_CHECK(3, 3, stc_top() == 1);
+
+        /* #3.4: pop, check value */
+        stc_pop();
+        TEST_CHECK(3, 4, stc_top() == 0);
 }
 
 void
@@ -90,7 +112,19 @@ dbg_test_init(void)
         TEST_CHECK(101, 1, !memcmp(tmp_buf, mem_ptr() + FONTSET_SIZE, size));
         free(tmp_buf);
         
-        /* #101.2-18 check if registers are empty */
+        /* #101.2-17 check if registers are empty */
         for (int i = 0; i < REGS_COUNT; ++i)
                 TEST_CHECK(101, i + 2, !reg_get(i));
+
+        /* #101.18 check if stack ptr is 0 */
+        TEST_CHECK(101, 18, stc_get_ptr() == 0);
+        
+        /* #101.19 check if stack bottom is empty */
+        TEST_CHECK(101, 19, stc_top() == 0);
+}
+
+void
+dbg_test_load(void)
+{
+        /* TODO: write tests after loading program */
 }
