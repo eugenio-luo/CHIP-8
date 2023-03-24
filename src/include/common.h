@@ -5,6 +5,7 @@
 
 #define MEMORY_SIZE   4096
 #define REGS_COUNT    16
+#define FLAG_REG      0xF
 #define SCREEN_HEIGHT 32
 #define SCREEN_WIDTH  64
 #define STACK_SIZE    16

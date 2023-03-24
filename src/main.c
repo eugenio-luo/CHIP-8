@@ -11,18 +11,19 @@ main(int argc, char **argv)
         dbg_test();
 #endif
         
-        if (sys_init())
+        if (sys_reset())
                 dbg_err("[main.c: main] system init failed");
 
 #ifdef TEST
+        
         dbg_test_init();
-#endif
+        dbg_test_inst();
+        (void) argv;
+
+#else
         
         sys_load(argv[1]);
-
-#ifdef TEST
-        dbg_test_load();
-#endif
-
         sys_cycle();
+
+#endif
 }

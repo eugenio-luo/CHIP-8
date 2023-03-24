@@ -1,7 +1,29 @@
 #ifndef _OPCODE_H
 #define _OPCODE_H
 
+#include "common.h"
+
 void op_reset(void);
+opcode_t op_get(void);
+void op_set(opcode_t op);
+void op_nxt(void);
 void op_exec(void);
+
+#define OP_SYS(ADDR)        (ADDR & 0xFFF)
+#define OP_CLS               0x00E0 /* TODO */
+#define OP_RET               0x00EE
+#define OP_JMP(ADDR)        ((ADDR & 0xFFF) | 0x1000)
+#define OP_CALL(ADDR)       ((ADDR & 0xFFF) | 0x2000)
+#define OP_SEV(REG, VAL)    (((REG & 0xF) << 8) | (VAL & 0xFF) | 0x3000)
+#define OP_SNE(REG, VAL)    (((REG & 0xF) << 8) | (VAL & 0xFF) | 0x4000)
+#define OP_SER(REG1, REG2)  (((REG1 & 0xF) << 8) | ((REG2 & 0xF) << 4) | 0x5000)
+#define OP_LDV(REG, VAL)    (((REG & 0xF) << 8) | (VAL & 0xFF) | 0x6000)
+#define OP_ADDV(REG, VAL)   (((REG & 0xF) << 8) | (VAL & 0xFF) | 0x7000)
+#define OP_LDR(REG1, REG2)  (((REG1 & 0xF) << 8) | ((REG2 & 0xF) << 4) | 0x8000)
+#define OP_OR(REG1, REG2)   (((REG1 & 0xF) << 8) | ((REG2 & 0xF) << 4) | 0x8001)
+#define OP_AND(REG1, REG2)  (((REG1 & 0xF) << 8) | ((REG2 & 0xF) << 4) | 0x8002)
+#define OP_XOR(REG1, REG2)  (((REG1 & 0xF) << 8) | ((REG2 & 0xF) << 4) | 0x8003)
+#define OP_ADDC(REG1, REG2) (((REG1 & 0xF) << 8) | ((REG2 & 0xF) << 4) | 0x8004)
+#define OP_SUB(REG1, REG2)  (((REG1 & 0xF) << 8) | ((REG2 & 0xF) << 4) | 0x8005)
 
 #endif

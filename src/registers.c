@@ -17,7 +17,7 @@ reg_reset(void)
         memset(g_reg, 0, REGS_COUNT * sizeof(reg_t));
 }
 
-uint16_t
+uint8_t
 reg_get(int idx)
 {
         if ((idx >= REGS_COUNT) | (idx < 0))
@@ -27,7 +27,7 @@ reg_get(int idx)
 }
 
 void
-reg_set(int idx, uint16_t val)
+reg_set(int idx, uint8_t val)
 {
         if ((idx >= REGS_COUNT) | (idx < 0))
                 dbg_err("[registers.c: reg_get] register index out of bound");
@@ -49,4 +49,9 @@ reg_set_pc(uint16_t addr)
         
         g_prog_cntr = addr;
 }
-        
+
+uint16_t
+reg_get_idx(void)
+{
+        return g_idx_reg;
+}

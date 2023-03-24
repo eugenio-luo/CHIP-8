@@ -17,7 +17,7 @@ uint8_t  g_delay_timer;
 uint8_t  g_sound_timer;
 
 int
-sys_init(void)
+sys_reset(void)
 {
         g_delay_timer = 0;
         g_sound_timer = 0;
@@ -63,5 +63,5 @@ sys_load(const char *file_name)
 void
 sys_cycle(void)
 {
-        op_exec();
+        op_nxt();
 }
