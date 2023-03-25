@@ -130,6 +130,30 @@ dbg_test_inst(void)
 {
         /* #200 INSTRUCTIONS */
 
+        /* #200.1 check if non existant instruction fails */
+        op_set(0x834A);
+        op_exec();
+        TEST_CHECK(200, 1, err_code);
+        sys_reset();
+
+        /* #200.2 check if SYS instruction fails if addr < PROGRAM_START */
+        op_set(OP_SYS(0xA0));
+        op_exec();
+        TEST_CHECK(200, 2, err_code);
+        sys_reset();
+
+        /* #200.3 check if SER fails whether nibble is different from 0 */
+        op_set(OP_SER(3, 4) | 0xA);
+        op_exec();
+        TEST_CHECK(200, 3, err_code);
+        sys_reset();
+
+        /* #200.4 check if SNER fails whether nibble is different from 0 */
+        op_set(OP_SNER(3, 4) | 0xA);
+        op_exec();
+        TEST_CHECK(200, 4, err_code);
+        sys_reset();
+
         /* #201 SYS (0x0NNN) */
         
         /* #201.1 check if SYS works */
@@ -182,18 +206,18 @@ dbg_test_inst(void)
         TEST_CHECK(205, 2, reg_get_pc() == cur_pc);
         sys_reset();
 
-        /* #206 SNE (0x4XKK) */
+        /* #206 SNEV (0x4XKK) */
 
-        /* #206.1 check if SNE works */
+        /* #206.1 check if SNEV works */
         cur_pc = reg_get_pc();
-        op_set(OP_SNE(1, 1));
+        op_set(OP_SNEV(1, 1));
         op_exec();
         TEST_CHECK(206, 1, reg_get_pc() == cur_pc + 2);
         sys_reset();
 
-        /* #206.2 check if SNE fails */
+        /* #206.2 check if SNEV fails */
         cur_pc = reg_get_pc();
-        op_set(OP_SNE(1, 0));
+        op_set(OP_SNEV(1, 0));
         op_exec();
         TEST_CHECK(206, 2, reg_get_pc() == cur_pc);
         sys_reset();
@@ -303,7 +327,7 @@ dbg_test_inst(void)
         op_exec();
         op_set(OP_ADDC(2, 1));
         op_exec();
-        TEST_CHECK(214, 1, reg_get(2) == 0xFF && reg_get(0xF) == 0);
+        TEST_CHECK(214, 1, reg_get(2) == 0xFF && reg_get(FLAG_REG) == 0);
         sys_reset();
 
         /* 214.2 check if ADDC carry works */
@@ -313,7 +337,7 @@ dbg_test_inst(void)
         op_exec();
         op_set(OP_ADDC(2, 1));
         op_exec();
-        TEST_CHECK(214, 2, reg_get(2) == 0xFA && reg_get(0xF) == 1);
+        TEST_CHECK(214, 2, reg_get(2) == 0xFA && reg_get(FLAG_REG) == 1);
         sys_reset();
 
         /* 215 SUB (0x8XY5) */
@@ -325,7 +349,7 @@ dbg_test_inst(void)
         op_exec();
         op_set(OP_SUB(2, 1));
         op_exec();
-        TEST_CHECK(215, 1, reg_get(2) == 1 && reg_get(0xF) == 1);
+        TEST_CHECK(215, 1, reg_get(2) == 1 && reg_get(FLAG_REG) == 1);
         sys_reset();
 
         /* 215.2 check if SUB borrow works */
@@ -335,10 +359,108 @@ dbg_test_inst(void)
         op_exec();
         op_set(OP_SUB(2, 1));
         op_exec();
-        TEST_CHECK(215, 2, reg_get(2) == 0xFF && reg_get(0xF) == 0);
+        TEST_CHECK(215, 2, reg_get(2) == 0xFF && reg_get(FLAG_REG) == 0);
         sys_reset();
 
-        
+        /* 216 SHR (0x8XY6) */
+
+        /* 216.1 check if SHR works */
+        op_set(OP_LDV(1, 4));
+        op_exec();
+        op_set(OP_SHR(1, 0));
+        op_exec();
+        TEST_CHECK(216, 1, reg_get(1) == 2 && reg_get(FLAG_REG) == 0);
+        sys_reset();
+
+        /* 216.2 check if SHR flag works */
+        op_set(OP_LDV(1, 5));
+        op_exec();
+        op_set(OP_SHR(1, 0));
+        op_exec();
+        TEST_CHECK(216, 2, reg_get(1) == 2 && reg_get(FLAG_REG) == 1);
+        sys_reset();
+
+        /* 217 SUBN (0x8XY7) */
+
+        /* 217.1 check if SUBN works */
+        op_set(OP_LDV(1, 3));
+        op_exec();
+        op_set(OP_LDV(2, 2));
+        op_exec();
+        op_set(OP_SUBN(2, 1));
+        op_exec();
+        TEST_CHECK(217, 1, reg_get(2) == 1 && reg_get(FLAG_REG) == 1);
+        sys_reset();
+
+        /* 217.2 check if SUBN borrow works */
+        op_set(OP_LDV(1, 2));
+        op_exec();
+        op_set(OP_LDV(2, 3));
+        op_exec();
+        op_set(OP_SUBN(2, 1));
+        op_exec();
+        TEST_CHECK(217, 2, reg_get(2) == 0xFF && reg_get(FLAG_REG) == 0);
+        sys_reset();
+
+        /* 218 SHL (0x8XYE) */
+
+        /* 218.1 check if SHL works */
+        op_set(OP_LDV(1, 4));
+        op_exec();
+        op_set(OP_SHL(1, 0));
+        op_exec();
+        TEST_CHECK(218, 1, reg_get(1) == 8 && reg_get(FLAG_REG) == 0);
+        sys_reset();
+
+        /* 218.2 check if SHL flag works */
+        op_set(OP_LDV(1, 0xC0));
+        op_exec();
+        op_set(OP_SHL(1, 0));
+        op_exec();
+        TEST_CHECK(218, 2, reg_get(1) == 0x80 && reg_get(FLAG_REG) == 1);
+        sys_reset();
+
+        /* 219 SNER (0x9XY0) */
+
+        /* 219.1 check if SNER works */
+        cur_pc = reg_get_pc();
+        op_set(OP_LDV(1, 1));
+        op_exec();
+        op_set(OP_SNER(1, 0));
+        op_exec();
+        TEST_CHECK(219, 1, reg_get_pc() == cur_pc + 2);
+        sys_reset();
+
+        /* 219.2 check if SNER fails */
+        cur_pc = reg_get_pc();
+        op_set(OP_SNER(1, 0));
+        op_exec();
+        TEST_CHECK(219, 2, reg_get_pc() == cur_pc);
+        sys_reset();
+
+        /* 220 LDI (0xANNN) */
+
+        /* 220.1 check if LDI works */
+        op_set(OP_LDI(0x600));
+        op_exec();
+        TEST_CHECK(220, 1, reg_get_idx() == 0x600);
+        sys_reset();
+
+        /* 221 JMPR (0xBNNN) */
+
+        /* 221.1 check if JMPR works */
+        op_set(OP_LDV(0, 0x20));
+        op_exec();
+        op_set(OP_JMPR(0x500));
+        op_exec();
+        TEST_CHECK(221, 1, reg_get_pc() == 0x520);
+        sys_reset();
+
+        /* 222 RND (0xCXKK) */
+        op_set(OP_RND(0, 0xFE));
+        op_exec();
+        TEST_CHECK(222, 1, reg_get(0) != 0); /* V0 can't never be 0 because of AND */
+        sys_reset();
 }
 
 void

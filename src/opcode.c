@@ -1,6 +1,9 @@
 #include "opcode.h"
 #include "common.h"
 #include "debug.h"
+#include <stdlib.h>
+#include <time.h>
+
 #include "memory.h"
 #include "registers.h"
 #include "stack.h"
@@ -20,6 +23,7 @@ void
 op_reset(void)
 {
         g_opcode = 0;
+        srand(time(NULL));
 }
 
 opcode_t
@@ -38,6 +42,12 @@ op_read(uint16_t pc)
 }
 
 static void
+op_empty(void)
+{
+        dbg_err("[opcode.c: op_empty] unknown instruction %x\n", g_opcode);
+}
+
+static void
 op_sys(void)
 {
         reg_set_pc(ADDR(g_opcode));
@@ -53,22 +63,6 @@ op_ret(void)
 {
         reg_set_pc(stc_top());
         stc_pop();
-}
-
-static void
-op_inst0(void)
-{
-        if (ADDR(g_opcode) >= PROGRAM_START) {
-                op_sys();
-                return;
-        }
-
-        if (g_opcode == 0x00E0)
-                op_cls();
-        else if (g_opcode == 0x00EE)
-                op_ret();
-        else
-                dbg_err("[opcode.c: op_inst0] unknown opcode %x\n", g_opcode);
 }
 
 static void
@@ -95,7 +89,7 @@ op_sev(void)
 }
 
 static void
-op_sne(void)
+op_snev(void)
 {
         reg_t reg_val = reg_get(BX(g_opcode));
         uint8_t val = BYTE(g_opcode); 
@@ -107,6 +101,9 @@ op_sne(void)
 static void
 op_ser(void)
 {
+        if (NIB(g_opcode) != 0)
+                op_empty();
+        
         reg_t reg1_val = reg_get(BX(g_opcode));
         reg_t reg2_val = reg_get(BY(g_opcode));
 
@@ -177,6 +174,80 @@ op_sub(void)
         reg_set(FLAG_REG, reg1_val > reg2_val);
 }
 
+static void
+op_shr(void)
+{
+        reg_t reg_val = reg_get(BX(g_opcode));
+        reg_set(BX(g_opcode), reg_val >> 1);
+        reg_set(FLAG_REG, reg_val & 0x1);
+}
+
+static void
+op_subn(void)
+{
+        reg_t reg1_val = reg_get(BX(g_opcode));
+        reg_t reg2_val = reg_get(BY(g_opcode));
+        reg_set(BX(g_opcode), reg2_val - reg1_val);
+        reg_set(FLAG_REG, reg2_val > reg1_val);
+}
+
+static void
+op_shl(void)
+{
+        reg_t reg_val = reg_get(BX(g_opcode));
+        reg_set(BX(g_opcode), reg_val << 1);
+        reg_set(FLAG_REG, (reg_val >> 7) & 0x1);
+}
+
+static void
+op_sner(void)
+{
+        if (NIB(g_opcode) != 0)
+                op_empty();
+
+        reg_t reg1_val = reg_get(BX(g_opcode));
+        reg_t reg2_val = reg_get(BY(g_opcode)); 
+        
+        if (reg1_val != reg2_val)
+                reg_set_pc(reg_get_pc() + 2);
+}        
+
+static void
+op_ldi(void)
+{
+        reg_set_idx(ADDR(g_opcode));
+}
+
+static void
+op_jmpr(void)
+{
+        uint16_t addr = reg_get(0) + ADDR(g_opcode);
+        reg_set_pc(addr);
+}
+
+static void
+op_rnd(void)
+{
+        uint16_t val = BYTE(g_opcode) & rand();
+        reg_set(BX(g_opcode), val);
+}
+
+static void
+op_inst0(void)
+{
+        if (ADDR(g_opcode) >= PROGRAM_START) {
+                op_sys();
+                return;
+        }
+
+        if (g_opcode == 0x00E0)
+                op_cls();
+        else if (g_opcode == 0x00EE)
+                op_ret();
+        else
+                op_empty();
+}
+
 static op_func_t inst8_func_table[] = {
         op_ldr,
         op_or,
@@ -184,6 +255,11 @@ static op_func_t inst8_func_table[] = {
         op_xor,
         op_addc,
         op_sub,
+        op_shr,
+        op_subn,
+        op_empty, op_empty, op_empty, op_empty, op_empty, op_empty,
+        op_shl,
+        op_empty,
 };
 
 static void
@@ -198,11 +274,15 @@ static op_func_t main_func_table[] = {
         op_jmp,
         op_call,
         op_sev,
-        op_sne,
+        op_snev,
         op_ser,
         op_ldv,
         op_addv,
         op_inst8,
+        op_sner,
+        op_ldi,
+        op_jmpr,
+        op_rnd,
 };
 
 void

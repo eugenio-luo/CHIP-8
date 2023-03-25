@@ -55,3 +55,12 @@ reg_get_idx(void)
 {
         return g_idx_reg;
 }
+
+void
+reg_set_idx(uint16_t addr)
+{
+        if (addr >= MEMORY_SIZE)
+                dbg_err("[registers.c: reg_set_idx] index register out of bound");
+
+        g_idx_reg = addr;
+}

@@ -15,7 +15,7 @@ void op_exec(void);
 #define OP_JMP(ADDR)        ((ADDR & 0xFFF) | 0x1000)
 #define OP_CALL(ADDR)       ((ADDR & 0xFFF) | 0x2000)
 #define OP_SEV(REG, VAL)    (((REG & 0xF) << 8) | (VAL & 0xFF) | 0x3000)
-#define OP_SNE(REG, VAL)    (((REG & 0xF) << 8) | (VAL & 0xFF) | 0x4000)
+#define OP_SNEV(REG, VAL)   (((REG & 0xF) << 8) | (VAL & 0xFF) | 0x4000)
 #define OP_SER(REG1, REG2)  (((REG1 & 0xF) << 8) | ((REG2 & 0xF) << 4) | 0x5000)
 #define OP_LDV(REG, VAL)    (((REG & 0xF) << 8) | (VAL & 0xFF) | 0x6000)
 #define OP_ADDV(REG, VAL)   (((REG & 0xF) << 8) | (VAL & 0xFF) | 0x7000)
@@ -25,5 +25,12 @@ void op_exec(void);
 #define OP_XOR(REG1, REG2)  (((REG1 & 0xF) << 8) | ((REG2 & 0xF) << 4) | 0x8003)
 #define OP_ADDC(REG1, REG2) (((REG1 & 0xF) << 8) | ((REG2 & 0xF) << 4) | 0x8004)
 #define OP_SUB(REG1, REG2)  (((REG1 & 0xF) << 8) | ((REG2 & 0xF) << 4) | 0x8005)
+#define OP_SHR(REG1, REG2)  (((REG1 & 0xF) << 8) | ((REG2 & 0xF) << 4) | 0x8006)
+#define OP_SUBN(REG1, REG2) (((REG1 & 0xF) << 8) | ((REG2 & 0xF) << 4) | 0x8007)
+#define OP_SHL(REG1, REG2)  (((REG1 & 0xF) << 8) | ((REG2 & 0xF) << 4) | 0x800E)
+#define OP_SNER(REG1, REG2) (((REG1 & 0xF) << 8) | ((REG2 & 0xF) << 4) | 0x9000)
+#define OP_LDI(ADDR)        ((ADDR & 0xFFF) | 0xA000)
+#define OP_JMPR(ADDR)       ((ADDR & 0xFFF) | 0xB000)
+#define OP_RND(REG, VAL)    (((REG & 0xF) << 8) | (VAL & 0xFF) | 0xC000)
 
 #endif
