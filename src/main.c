@@ -11,7 +11,7 @@ main(int argc, char **argv)
         dbg_test();
 #endif
         
-        if (sys_reset())
+        if (sys_init())
                 dbg_err("[main.c: main] system init failed");
 
 #ifdef TEST
@@ -26,4 +26,6 @@ main(int argc, char **argv)
         sys_cycle();
 
 #endif
+
+        sys_quit();
 }

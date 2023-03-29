@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <SDL2/SDL.h>
 
 #include "common.h"
 #include "system.h"
@@ -9,13 +10,31 @@
 #include "opcode.h"
 #include "stack.h"
 #include "debug.h"
+#include "screen.h"
 
-uint8_t  g_screen[SCREEN_WIDTH * SCREEN_HEIGHT];
 uint8_t  g_keys[KEYS_COUNT];
 
 uint8_t  g_delay_timer;
 uint8_t  g_sound_timer;
 
+int
+sys_init(void)
+{
+        g_delay_timer = 0;
+        g_sound_timer = 0;
+
+        op_reset();
+        reg_reset();
+        stc_reset();
+        mem_reset();
+        /* TODO: better naming convention? */
+        scr_init();
+
+        mem_ld_font();
+        
+        return 0;
+}
+        
 int
 sys_reset(void)
 {
@@ -26,8 +45,8 @@ sys_reset(void)
         reg_reset();
         stc_reset();
         mem_reset();
-
-        memset(g_screen, 0, SCREEN_WIDTH * SCREEN_HEIGHT);
+        /* TODO: better naming convention? */
+        scr_reset();
 
         mem_ld_font();
         
@@ -63,5 +82,20 @@ sys_load(const char *file_name)
 void
 sys_cycle(void)
 {
-        op_nxt();
+        int quit = 0;
+        SDL_Event event;
+        while (!quit) {
+                while (SDL_PollEvent(&event)) {
+                        if (event.type == SDL_QUIT)
+                                quit = 1;
+                }
+                
+                op_nxt();
+        }
+}
+
+void
+sys_quit(void)
+{
+        scr_quit();
 }

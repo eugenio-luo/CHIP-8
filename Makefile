@@ -10,7 +10,8 @@ W_FLAGS := -std=c99 -Wpedantic -pedantic-errors -Werror -Wall -Wextra \
 	   -Wnested-externs -Wpointer-arith -Wredundant-decls -Wsequence-point -Wshadow \
 	   -Wstrict-prototypes -Wswitch -Wundef -Wunreachable-code \
 	   -Wunused-but-set-parameter -Wwrite-strings
-CFLAGS := -I '$(INCLUDE_DIR)' $(W_FLAGS) 
+CFLAGS := -I '$(INCLUDE_DIR)' $(W_FLAGS)
+SDL_FLAGS := -lSDL2
 TEST_FLAGS := -DTEST $(CFLAGS) 
 
 all: compile
@@ -19,7 +20,7 @@ clean:
 	@ rm $(OUT_FILE)
 
 compile:
-	@ gcc $(CFLAGS) $(CFILES) -o $(OUT_FILE)
+	@ gcc $(CFLAGS) $(CFILES) $(SDL_FLAGS) -o $(OUT_FILE)
 
 test:
-	@ gcc $(TEST_FLAGS) $(CFILES) -o $(OUT_FILE)
+	@ gcc $(TEST_FLAGS) $(CFILES) $(SDL_FLAGS) -o $(OUT_FILE)

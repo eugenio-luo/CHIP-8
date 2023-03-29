@@ -10,6 +10,7 @@
 #include "stack.h"
 #include "opcode.h"
 #include "system.h"
+#include "screen.h"
 
 #define RED "\033[0;31m"
 #define GREEN "\033[0;32m"
@@ -457,6 +458,8 @@ dbg_test_inst(void)
         sys_reset();
 
         /* 222 RND (0xCXKK) */
+
+        /* 222.1 check if RND works */
         op_set(OP_RND(0, 0xFE));
         op_exec();
         TEST_CHECK(222, 1, reg_get(0) != 0); /* V0 can't never be 0 because of AND */
