@@ -12,16 +12,11 @@
 #include "debug.h"
 #include "screen.h"
 #include "keyboard.h"
-
-uint8_t  g_delay_timer;
-uint8_t  g_sound_timer;
+#include "timer.h"
 
 int
 sys_init(void)
 {
-        g_delay_timer = 0;
-        g_sound_timer = 0;
-
         op_reset();
         reg_reset();
         stc_reset();
@@ -29,6 +24,7 @@ sys_init(void)
         key_reset();
         /* TODO: better naming convention? */
         scr_init();
+        tme_reset();
 
         mem_ld_font();
         
@@ -38,16 +34,14 @@ sys_init(void)
 int
 sys_reset(void)
 {
-        g_delay_timer = 0;
-        g_sound_timer = 0;
-
         op_reset();
         reg_reset();
         stc_reset();
         mem_reset();
-        /* TODO: better naming convention? */
+        key_reset();
         scr_reset();
-
+        tme_reset();
+        
         mem_ld_font();
         
         return 0;

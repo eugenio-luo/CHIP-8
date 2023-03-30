@@ -9,6 +9,7 @@
 #include "stack.h"
 #include "screen.h"
 #include "keyboard.h"
+#include "timer.h"
 
 typedef void (*op_func_t)(void);
 
@@ -268,28 +269,53 @@ op_drw(void)
 static void
 op_skp(void)
 {
-        int key_pos = reg_get(BX(g_opcode));
+        reg_t reg_val = reg_get(BX(g_opcode));
 
-        if (key_get(key_pos))
+        if (key_get(reg_val))
                 reg_inc_pc();
 }
 
 static void
 op_sknp(void)
 {
-        int key_pos = reg_get(BX(g_opcode));
+        reg_t reg_val = reg_get(BX(g_opcode));
 
-        if (!key_get(key_pos))
+        if (!key_get(reg_val))
                 reg_inc_pc();
 }
 
-/*
 static void
 op_ldrt(void)
 {
-        reg_set(BX(g_opcode), );
+        reg_set(BX(g_opcode), tme_get_del());
 }
-*/
+
+static void
+op_ldk(void)
+{
+        reg_set(BX(g_opcode), key_wait());
+}
+
+static void
+op_ldtr(void)
+{
+        reg_t reg_val = reg_get(BX(g_opcode));
+        tme_set_del(reg_val);
+}
+
+static void
+op_ldsr(void)
+{
+        reg_t reg_val = reg_get(BX(g_opcode));
+        tme_set_snd(reg_val);
+}
+
+static void
+op_addi(void)
+{
+        reg_t reg_val = reg_get(BX(g_opcode));
+        reg_set_idx(reg_get_idx() + reg_val);
+}
 
 static void
 op_inst0(void)
@@ -344,6 +370,24 @@ op_instF(void)
 {
         switch (BYTE(g_opcode)) {
         case 0x07:
+                op_ldrt();
+                break;
+
+        case 0x0A:
+                op_ldk();
+                break;
+
+        case 0x15:
+                op_ldtr();
+                break;
+
+        case 0x18:
+                op_ldsr();
+                break;
+
+        case 0x1E:
+                op_addi();
+                
         default:
                 op_empty();
         }

@@ -37,6 +37,12 @@ void op_exec(void);
 #define OP_DRW(REG1, REG2, VAL) (((REG1 & 0xF) << 8) | ((REG2 & 0xF) << 4) | (VAL & 0xF) | 0xD000)
 #define OP_SKP(REG)             (((REG & 0xF) << 8) | 0xE09E)
 #define OP_SKNP(REG)            (((REG & 0xF) << 8) | 0xE0A1)
+
+/* TODO: all these have to be tested */
 #define OP_LDRT(REG)            (((REG & 0xF) << 8) | 0xF007)
+#define OP_LDK(REG)             (((REG & 0xF) << 8) | 0xF00A)
+#define OP_LDTR(REG)            (((REG & 0xF) << 8) | 0xF015)
+#define OP_LDSR(REG)            (((REG & 0xF) << 8) | 0xF018)
+#define OP_ADDI(REG)            (((REG & 0xF) << 8) | 0xF01E)
 
 #endif
