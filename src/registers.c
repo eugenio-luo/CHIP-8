@@ -42,6 +42,12 @@ reg_get_pc(void)
 }
 
 void
+reg_inc_pc(void)
+{
+        g_prog_cntr += 2;
+}
+
+void
 reg_set_pc(uint16_t addr)
 {
         if ((addr >= MEMORY_SIZE) | (addr < PROGRAM_START))

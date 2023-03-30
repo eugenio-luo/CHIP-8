@@ -4,10 +4,8 @@
 #include "memory.h"
 #include "common.h"
 #include "debug.h"
+#include "fontset.h"
 
-/* TODO: create its own file to manage fontset */
-/* for debug reason it has its last value as 1 */
-uint8_t  g_fontset[FONTSET_SIZE] = {[FONTSET_SIZE - 1] = 1}; 
 uint8_t  g_memory[MEMORY_SIZE];
 
 void
@@ -28,7 +26,7 @@ mem_get(int off)
 {
         if ((off >= MEMORY_SIZE) | (off < 0))
                 dbg_err("[memory.c: mem_get] memory offset out of bound");
-        
+
         return g_memory[off];
 }
 

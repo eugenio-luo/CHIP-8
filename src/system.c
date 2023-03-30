@@ -11,8 +11,7 @@
 #include "stack.h"
 #include "debug.h"
 #include "screen.h"
-
-uint8_t  g_keys[KEYS_COUNT];
+#include "keyboard.h"
 
 uint8_t  g_delay_timer;
 uint8_t  g_sound_timer;
@@ -27,6 +26,7 @@ sys_init(void)
         reg_reset();
         stc_reset();
         mem_reset();
+        key_reset();
         /* TODO: better naming convention? */
         scr_init();
 
@@ -82,15 +82,27 @@ sys_load(const char *file_name)
 void
 sys_cycle(void)
 {
+        mem_set(0x1FF, 1);
+        
+        for (int i = 0; i < 39; ++i) {
+                printf("%d: ", i);
+                op_nxt();
+        }
+       
         int quit = 0;
         SDL_Event event;
         while (!quit) {
                 while (SDL_PollEvent(&event)) {
-                        if (event.type == SDL_QUIT)
+                        switch (event.type) {
+                        case SDL_QUIT:
                                 quit = 1;
+                                break;
+
+                        case SDL_KEYDOWN:
+                        case SDL_KEYUP:
+                                key_handle(&event);
+                        }
                 }
-                
-                op_nxt();
         }
 }
 
@@ -99,3 +111,4 @@ sys_quit(void)
 {
         scr_quit();
 }
+

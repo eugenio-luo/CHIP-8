@@ -1,12 +1,14 @@
-#include "opcode.h"
-#include "common.h"
-#include "debug.h"
 #include <stdlib.h>
 #include <time.h>
 
+#include "opcode.h"
+#include "common.h"
+#include "debug.h"
 #include "memory.h"
 #include "registers.h"
 #include "stack.h"
+#include "screen.h"
+#include "keyboard.h"
 
 typedef void (*op_func_t)(void);
 
@@ -56,6 +58,7 @@ op_sys(void)
 static void
 op_cls(void)
 {
+        scr_clear();
 }
 
 static void
@@ -85,7 +88,7 @@ op_sev(void)
         uint8_t val = BYTE(g_opcode); 
 
         if (reg_val == val)
-                reg_set_pc(reg_get_pc() + 2);
+                reg_inc_pc();
 }
 
 static void
@@ -95,7 +98,7 @@ op_snev(void)
         uint8_t val = BYTE(g_opcode); 
         
         if (reg_val != val)
-                reg_set_pc(reg_get_pc() + 2);
+                reg_inc_pc();
 }
 
 static void
@@ -108,7 +111,7 @@ op_ser(void)
         reg_t reg2_val = reg_get(BY(g_opcode));
 
         if (reg1_val == reg2_val)
-                reg_set_pc(reg_get_pc() + 2);
+                reg_inc_pc();
 }
 
 static void
@@ -209,7 +212,7 @@ op_sner(void)
         reg_t reg2_val = reg_get(BY(g_opcode)); 
         
         if (reg1_val != reg2_val)
-                reg_set_pc(reg_get_pc() + 2);
+                reg_inc_pc();
 }        
 
 static void
@@ -231,6 +234,62 @@ op_rnd(void)
         uint16_t val = BYTE(g_opcode) & rand();
         reg_set(BX(g_opcode), val);
 }
+
+static void
+op_drw(void)
+{
+        int w = reg_get(BX(g_opcode)) % SCREEN_WIDTH;
+        int h = reg_get(BY(g_opcode)) % SCREEN_HEIGHT;
+        int limit = NIB(g_opcode);
+        uint16_t addr = reg_get_idx();
+
+        for (int i = 0; i < limit; ++i) {
+                int byte = mem_get(addr + i);
+                int y = (h + i) % SCREEN_HEIGHT; 
+
+                for (int j = 0; j < 8; ++j) {
+                        int x = (w + j) % SCREEN_WIDTH;
+                        if (w + j >= SCREEN_WIDTH)
+                                break;
+                        
+                        int pixel = scr_get(x, y);
+                        int xor = ((byte >> (7 - j)) & 0x1) ^ pixel;
+
+                        scr_set(x, y, xor);
+                        if (pixel && !xor)
+                                reg_set(FLAG_REG, 1);
+                }
+
+        }
+
+        scr_render();
+}
+
+static void
+op_skp(void)
+{
+        int key_pos = reg_get(BX(g_opcode));
+
+        if (key_get(key_pos))
+                reg_inc_pc();
+}
+
+static void
+op_sknp(void)
+{
+        int key_pos = reg_get(BX(g_opcode));
+
+        if (!key_get(key_pos))
+                reg_inc_pc();
+}
+
+/*
+static void
+op_ldrt(void)
+{
+        reg_set(BX(g_opcode), );
+}
+*/
 
 static void
 op_inst0(void)
@@ -269,6 +328,27 @@ op_inst8(void)
         op_func();
 }
 
+static void
+op_instE(void)
+{
+        if (BYTE(g_opcode) == 0x9E)
+                op_skp();
+        else if (BYTE(g_opcode) == 0xA1)
+                op_sknp();
+        else
+                op_empty();
+}
+
+static void
+op_instF(void)
+{
+        switch (BYTE(g_opcode)) {
+        case 0x07:
+        default:
+                op_empty();
+        }
+}
+         
 static op_func_t main_func_table[] = {
         op_inst0,
         op_jmp,
@@ -283,13 +363,19 @@ static op_func_t main_func_table[] = {
         op_ldi,
         op_jmpr,
         op_rnd,
+        op_drw,
+        op_instE,
+        op_instF,
 };
 
 void
 op_nxt(void)
 {
         g_opcode = op_read(reg_get_pc());
+        printf("%x\n", g_opcode);
         op_exec();
+        dbg_show_regs();
+        reg_inc_pc();
 }
 
 void

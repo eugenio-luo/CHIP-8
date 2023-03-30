@@ -11,6 +11,7 @@
 #include "opcode.h"
 #include "system.h"
 #include "screen.h"
+#include "keyboard.h"
 
 #define RED "\033[0;31m"
 #define GREEN "\033[0;32m"
@@ -45,6 +46,8 @@ dbg_err(const char *format, ...)
         vfprintf(stderr, format, args);
         fprintf(stderr, "\n");
 
+        dbg_show_regs();
+        
         va_end(args);
         exit(1);
 
@@ -464,6 +467,48 @@ dbg_test_inst(void)
         op_exec();
         TEST_CHECK(222, 1, reg_get(0) != 0); /* V0 can't never be 0 because of AND */
         sys_reset();
+
+        /* 223 SKP (0xEX9E) */
+
+        /* 223.1 check if SKP works */
+        cur_pc = reg_get_pc();
+        key_set(0xA, 1);
+        op_set(OP_LDV(1, 0xA));
+        op_exec();
+        op_set(OP_SKP(1));
+        op_exec();
+        TEST_CHECK(223, 1, reg_get_pc() == cur_pc + 2);
+        sys_reset();
+        
+        /* 223.2 check if SKP fails */
+        cur_pc = reg_get_pc();
+        key_set(0xA, 0);
+        op_set(OP_LDV(1, 0xA));
+        op_exec();
+        op_set(OP_SKP(1));
+        op_exec();
+        TEST_CHECK(223, 2, reg_get_pc() == cur_pc);
+        sys_reset();
+        
+        /* 224 SKNP (0xEXA1) */
+
+        /* 224.1 check if SKNP works */
+        cur_pc = reg_get_pc();
+        key_set(0xA, 0);
+        op_set(OP_LDV(1, 0xA));
+        op_exec();
+        op_set(OP_SKNP(1));
+        op_exec();
+        TEST_CHECK(224, 1, reg_get_pc() == cur_pc + 2);
+
+        /* 224.2 check if SKNP fails */
+        cur_pc = reg_get_pc();
+        key_set(0xA, 1);
+        op_set(OP_LDV(1, 0xA));
+        op_exec();
+        op_set(OP_SKNP(1));
+        op_exec();
+        TEST_CHECK(224, 2, reg_get_pc() == cur_pc);
 }
 
 void

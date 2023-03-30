@@ -64,7 +64,7 @@ scr_get(int w, int h)
 }
 
 void
-scr_on(int w, int h)
+scr_set(int w, int h, int val)
 {
         if (w >= SCREEN_WIDTH)
                 dbg_err("[screen.c: scr_on] width out of bound");
@@ -72,27 +72,22 @@ scr_on(int w, int h)
         if (h >= SCREEN_HEIGHT)
                 dbg_err("[screen.c: scr_on] height out of bound");
         
-        g_screen[w + h * SCREEN_WIDTH] = 1;
+        g_screen[w + h * SCREEN_WIDTH] = (val & 0x1);
 }
 
 void
-scr_off(int w, int h)
+scr_clear(void)
 {
-        if (w >= SCREEN_WIDTH)
-                dbg_err("[screen.c: scr_on] width out of bound");
-        
-        if (h >= SCREEN_HEIGHT)
-                dbg_err("[screen.c: scr_on] height out of bound");
-        
-        g_screen[w + h * SCREEN_WIDTH] = 0;
+        SDL_SetRenderDrawColor(g_renderer, ocolor[0], ocolor[1], ocolor[2], SDL_ALPHA_OPAQUE);
+        SDL_RenderClear(g_renderer);
+        SDL_RenderPresent(g_renderer);
 }
-        
+
 void
 scr_render(void)
 {
-        SDL_RenderClear(g_renderer);
         SDL_SetRenderDrawColor(g_renderer, ocolor[0], ocolor[1], ocolor[2], SDL_ALPHA_OPAQUE);
-        SDL_RenderDrawRect(g_renderer, NULL);
+        SDL_RenderClear(g_renderer);
 
         SDL_SetRenderDrawColor(g_renderer, mcolor[0], mcolor[1], mcolor[2], SDL_ALPHA_OPAQUE);
         for (int h = 0; h < SCREEN_HEIGHT; ++h) {
