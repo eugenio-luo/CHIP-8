@@ -33,16 +33,18 @@ void op_exec(void);
 #define OP_LDI(ADDR)            ((ADDR & 0xFFF) | 0xA000)
 #define OP_JMPR(ADDR)           ((ADDR & 0xFFF) | 0xB000)
 #define OP_RND(REG, VAL)        (((REG & 0xF) << 8) | (VAL & 0xFF) | 0xC000)
-/* TODO: tests for OP_DRW */
+/* TODO: tests for OP_DRW, I think the chip-8 test suite is pretty good as a test */
 #define OP_DRW(REG1, REG2, VAL) (((REG1 & 0xF) << 8) | ((REG2 & 0xF) << 4) | (VAL & 0xF) | 0xD000)
 #define OP_SKP(REG)             (((REG & 0xF) << 8) | 0xE09E)
 #define OP_SKNP(REG)            (((REG & 0xF) << 8) | 0xE0A1)
-
-/* TODO: all these have to be tested */
 #define OP_LDRT(REG)            (((REG & 0xF) << 8) | 0xF007)
 #define OP_LDK(REG)             (((REG & 0xF) << 8) | 0xF00A)
 #define OP_LDTR(REG)            (((REG & 0xF) << 8) | 0xF015)
 #define OP_LDSR(REG)            (((REG & 0xF) << 8) | 0xF018)
 #define OP_ADDI(REG)            (((REG & 0xF) << 8) | 0xF01E)
+#define OP_LDF(REG)             (((REG & 0xF) << 8) | 0xF029)
+#define OP_LDB(REG)             (((REG & 0xF) << 8) | 0xF033)
+#define OP_LDIR(REG)            (((REG & 0xF) << 8) | 0xF055)
+#define OP_LDRI(REG)            (((REG & 0xF) << 8) | 0xF065)
 
 #endif

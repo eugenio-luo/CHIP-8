@@ -24,7 +24,10 @@
 #define STACK_SIZE     16
 #define KEYS_COUNT     16
 #define PROGRAM_START  0x200
+#define FONTSET_OFF    0x0
 #define FONTSET_SIZE   0x50
+
+#define TIMER_PERIOD   16
 
 typedef uint16_t opcode_t;
 typedef uint8_t reg_t;

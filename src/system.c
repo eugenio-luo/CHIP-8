@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <threads.h>
 #include <SDL2/SDL.h>
 
 #include "common.h"
@@ -97,6 +98,8 @@ sys_cycle(void)
                                 key_handle(&event);
                         }
                 }
+
+                tme_update();
         }
 }
 

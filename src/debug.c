@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <SDL2/SDL.h>
 
 #include "debug.h"
 #include "memory.h"
@@ -12,6 +13,8 @@
 #include "system.h"
 #include "screen.h"
 #include "keyboard.h"
+#include "timer.h"
+#include "fontset.h"
 
 #define RED "\033[0;31m"
 #define GREEN "\033[0;32m"
@@ -500,6 +503,7 @@ dbg_test_inst(void)
         op_set(OP_SKNP(1));
         op_exec();
         TEST_CHECK(224, 1, reg_get_pc() == cur_pc + 2);
+        sys_reset();
 
         /* 224.2 check if SKNP fails */
         cur_pc = reg_get_pc();
@@ -509,6 +513,114 @@ dbg_test_inst(void)
         op_set(OP_SKNP(1));
         op_exec();
         TEST_CHECK(224, 2, reg_get_pc() == cur_pc);
+        sys_reset();
+
+        /* 225 LDRT (0xFX07) */
+
+        /* 225.1 check if LDRT works */
+        tme_set_del(2);
+        op_set(OP_LDRT(1));
+        op_exec();
+        TEST_CHECK(225, 1, reg_get(1) == 2);
+        sys_reset();
+
+        /* 226 LDK (0xFX0A) */
+
+        /* 226.1 check if LDK works */
+        SDL_Event event;
+        event.type = SDL_KEYDOWN;
+        event.key.keysym.scancode = SDL_SCANCODE_Q;
+        SDL_PushEvent(&event);
+        op_set(OP_LDK(1));
+        op_exec();
+        TEST_CHECK(226, 1, reg_get(1) == 4);
+        sys_reset();
+
+        /* 227 LDTR (0xFX15) */
+
+        /* 227.1 check if LDTR works */
+        op_set(OP_LDV(1, 5));
+        op_exec();
+        op_set(OP_LDTR(1));
+        op_exec();
+        TEST_CHECK(227, 1, tme_get_del() == 5);
+        sys_reset();
+
+        /* 228 LDSR (0xFX18) */
+
+        /* 228.1 check if LDSR works */
+        op_set(OP_LDV(1, 5));
+        op_exec();
+        op_set(OP_LDSR(1));
+        op_exec();
+        TEST_CHECK(228, 1, tme_get_snd() == 5);
+        sys_reset();
+
+        /* 229 ADDI (0xFX1E) */
+
+        /* 229.1 check if ADDI works */
+        op_set(OP_LDI(5));
+        op_exec();
+        op_set(OP_LDV(1, 3));
+        op_exec();
+        op_set(OP_ADDI(1));
+        op_exec();
+        TEST_CHECK(229, 1, reg_get_idx() == 8);
+        sys_reset();
+
+        /* 230 LDF (0xFX29) */
+        
+        /* 230.1 check if LDF works */
+        op_set(OP_LDV(1, 0xD));
+        op_exec();
+        op_set(OP_LDF(1));
+        op_exec();
+        TEST_CHECK(230, 1, reg_get_idx() == FONT_ADDR(0xD));
+        sys_reset();
+
+        /* 231 LDB (0xFX33) */
+
+        /* 231.1 check if LDB works */
+        op_set(OP_LDV(1, 123));
+        op_exec();
+        op_set(OP_LDI(0x400));
+        op_exec();
+        op_set(OP_LDB(1));
+        op_exec();
+        TEST_CHECK(231, 1, mem_get(0x400) == 1 && mem_get(0x401) == 2 && mem_get(0x402) == 3);
+        sys_reset();
+
+        /* 232 LDIR (0xFX55) */
+
+        /* 232.1 check if LDIR works */
+        op_set(OP_LDV(0, 0));
+        op_exec();
+        op_set(OP_LDV(1, 1));
+        op_exec();
+        op_set(OP_LDV(2, 2));
+        op_exec();
+        op_set(OP_LDV(5, 2));
+        op_exec();
+        op_set(OP_LDI(0x400));
+        op_exec();
+        op_set(OP_LDIR(5));
+        op_exec();
+        TEST_CHECK(232, 1, mem_get(0x400) == 0 && mem_get(0x401) == 1 && mem_get(0x402) == 2);
+        sys_reset();
+        
+        /* 233 LDRI (0xFX65) */
+
+        /* 233.1 check if LDRI works */
+        mem_set(0x400, 0);
+        mem_set(0x401, 1);
+        mem_set(0x402, 2);
+        op_set(OP_LDI(0x400));
+        op_exec();
+        op_set(OP_LDV(5, 2));
+        op_exec();
+        op_set(OP_LDRI(5));
+        op_exec();
+        TEST_CHECK(233, 1, reg_get(0) == 0 && reg_get(1) == 1 && reg_get(2) == 2);
 }
 
 void

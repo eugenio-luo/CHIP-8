@@ -10,6 +10,7 @@
 #include "screen.h"
 #include "keyboard.h"
 #include "timer.h"
+#include "fontset.h"
 
 typedef void (*op_func_t)(void);
 
@@ -318,6 +319,45 @@ op_addi(void)
 }
 
 static void
+op_ldf(void)
+{
+        reg_t reg_val = reg_get(BX(g_opcode));
+        reg_set_idx(FONT_ADDR(reg_val));
+}
+
+static void
+op_ldb(void)
+{
+        reg_t reg_val = reg_get(BX(g_opcode));
+        uint16_t addr = reg_get_idx();
+        
+        for (int i = 2; i >= 0; --i) {
+                mem_set(addr + i, reg_val % 10);
+                reg_val /= 10;
+        }
+}        
+
+static void
+op_ldir(void)
+{
+        reg_t reg_val = reg_get(BX(g_opcode));
+        uint16_t addr = reg_get_idx();
+
+        for (int i = 0; i <= reg_val; ++i)
+                mem_set(addr + i, reg_get(i));
+}
+
+static void
+op_ldri(void)
+{
+        reg_t reg_val = reg_get(BX(g_opcode));
+        uint16_t addr = reg_get_idx();
+
+        for (int i = 0; i <= reg_val; ++i)
+                reg_set(i, mem_get(addr + i));
+}
+
+static void
 op_inst0(void)
 {
         if (ADDR(g_opcode) >= PROGRAM_START) {
@@ -387,6 +427,23 @@ op_instF(void)
 
         case 0x1E:
                 op_addi();
+                break;
+
+        case 0x29:
+                op_ldf();
+                break;
+
+        case 0x33:
+                op_ldb();
+                break;
+
+        case 0x55:
+                op_ldir();
+                break;
+
+        case 0x65:
+                op_ldri();
+                break;
                 
         default:
                 op_empty();
