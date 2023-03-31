@@ -4,6 +4,7 @@
 #include "common.h"
 #include "keyboard.h"
 #include "debug.h"
+#include "registers.h"
 
 uint8_t  g_keys[KEYS_COUNT];
 
@@ -25,7 +26,13 @@ key_get(int idx)
 int
 key_wait(void)
 {
-        /* TODO: infinite loop is too much, maybe time limit if stuck? */
+        /* CHIP-8's strange quirk, 0xFX0A halts execution until key press, it means that
+           the program counter shouldn't increased too, but we already increased it, so we
+           decrease it again. It isn't possible to increase AFTER execution as the right
+           behaviour is to increase the program counter BEFORE executing the instruction */
+
+        reg_dec_pc();
+        
         SDL_Event event;
         while (1) {
                 while (SDL_PollEvent(&event)) {
@@ -34,6 +41,11 @@ key_wait(void)
 
                         int key = key_handle(&event);
 
+                        /* another strange quirk, there's a small delay after the key press
+                           to check if there's a release, because it prevents spurious readings */
+
+                        /* TODO: introduce quirk */
+                        
                         if (key != -1)
                                 return key;
                 }
@@ -100,9 +112,9 @@ key_handle(SDL_Event *event)
                 g_keys[0] = (event->type == SDL_KEYDOWN) ? 1 : 0;
                 return 0;
 
-        case SDL_SCANCODE_B:
-                g_keys[0xC] = (event->type == SDL_KEYDOWN) ? 1 : 0;
-                return 0xC;
+        case SDL_SCANCODE_C:
+                g_keys[0xB] = (event->type == SDL_KEYDOWN) ? 1 : 0;
+                return 0xB;
                 
         case SDL_SCANCODE_V:
                 g_keys[0xF] = (event->type == SDL_KEYDOWN) ? 1 : 0;

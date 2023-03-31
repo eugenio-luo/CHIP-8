@@ -77,13 +77,6 @@ sys_load(const char *file_name)
 void
 sys_cycle(void)
 {
-        mem_set(0x1FF, 1);
-        
-        for (int i = 0; i < 39; ++i) {
-                printf("%d: ", i);
-                op_nxt();
-        }
-       
         int quit = 0;
         SDL_Event event;
         while (!quit) {
@@ -99,6 +92,7 @@ sys_cycle(void)
                         }
                 }
 
+                op_nxt();
                 tme_update();
         }
 }

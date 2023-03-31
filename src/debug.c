@@ -599,11 +599,9 @@ dbg_test_inst(void)
         op_exec();
         op_set(OP_LDV(2, 2));
         op_exec();
-        op_set(OP_LDV(5, 2));
-        op_exec();
         op_set(OP_LDI(0x400));
         op_exec();
-        op_set(OP_LDIR(5));
+        op_set(OP_LDIR(2));
         op_exec();
         TEST_CHECK(232, 1, mem_get(0x400) == 0 && mem_get(0x401) == 1 && mem_get(0x402) == 2);
         sys_reset();
@@ -616,9 +614,7 @@ dbg_test_inst(void)
         mem_set(0x402, 2);
         op_set(OP_LDI(0x400));
         op_exec();
-        op_set(OP_LDV(5, 2));
-        op_exec();
-        op_set(OP_LDRI(5));
+        op_set(OP_LDRI(2));
         op_exec();
         TEST_CHECK(233, 1, reg_get(0) == 0 && reg_get(1) == 1 && reg_get(2) == 2);
 }

@@ -295,6 +295,7 @@ static void
 op_ldk(void)
 {
         reg_set(BX(g_opcode), key_wait());
+        reg_inc_pc();
 }
 
 static void
@@ -340,20 +341,18 @@ op_ldb(void)
 static void
 op_ldir(void)
 {
-        reg_t reg_val = reg_get(BX(g_opcode));
         uint16_t addr = reg_get_idx();
 
-        for (int i = 0; i <= reg_val; ++i)
+        for (int i = 0; i <= BX(g_opcode); ++i)
                 mem_set(addr + i, reg_get(i));
 }
 
 static void
 op_ldri(void)
 {
-        reg_t reg_val = reg_get(BX(g_opcode));
         uint16_t addr = reg_get_idx();
-
-        for (int i = 0; i <= reg_val; ++i)
+        
+        for (int i = 0; i <= BX(g_opcode); ++i)
                 reg_set(i, mem_get(addr + i));
 }
 
@@ -473,10 +472,9 @@ void
 op_nxt(void)
 {
         g_opcode = op_read(reg_get_pc());
-        printf("%x\n", g_opcode);
+        reg_inc_pc();
         op_exec();
         dbg_show_regs();
-        reg_inc_pc();
 }
 
 void

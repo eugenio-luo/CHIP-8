@@ -78,6 +78,8 @@ scr_set(int w, int h, int val)
 void
 scr_clear(void)
 {
+        memset(g_screen, 0, SCREEN_WIDTH * SCREEN_HEIGHT);
+        
         SDL_SetRenderDrawColor(g_renderer, ocolor[0], ocolor[1], ocolor[2], SDL_ALPHA_OPAQUE);
         SDL_RenderClear(g_renderer);
         SDL_RenderPresent(g_renderer);

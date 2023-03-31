@@ -32,7 +32,7 @@ stc_push(uint16_t val)
 void
 stc_pop(void)
 {
-        if (g_stack_ptr <= 0)
+        if (g_stack_ptr < 0)
                 dbg_err("[stack.c: stc_pop] stack underflow");
 
         --g_stack_ptr;

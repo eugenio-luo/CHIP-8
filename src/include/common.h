@@ -28,6 +28,7 @@
 #define FONTSET_SIZE   0x50
 
 #define TIMER_PERIOD   16
+#define SPURIOUS_DELAY 4
 
 typedef uint16_t opcode_t;
 typedef uint8_t reg_t;
