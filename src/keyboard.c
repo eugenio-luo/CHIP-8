@@ -5,6 +5,7 @@
 #include "keyboard.h"
 #include "debug.h"
 #include "registers.h"
+#include "timer.h"
 
 uint8_t  g_keys[KEYS_COUNT];
 
@@ -23,32 +24,52 @@ key_get(int idx)
         return g_keys[idx];
 }
 
+static int
+key_poll(uint32_t event_type)
+{
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+                int key = key_handle(&event);
+                if (event.type != event_type)
+                        continue;
+                
+                return key;
+        }
+
+        return 0;
+}
+
 int
 key_wait(void)
 {
         /* CHIP-8's strange quirk, 0xFX0A halts execution until key press, it means that
            the program counter shouldn't increased too, but we already increased it, so we
-           decrease it again. It isn't possible to increase AFTER execution as the right
-           behaviour is to increase the program counter BEFORE executing the instruction */
-
-        reg_dec_pc();
+           decrease it again. */
         
+        reg_dec_pc();
+
+        int key = 0;
+        while (!key)
+                key = key_poll(SDL_KEYDOWN);
+
+        /* another strange quirk, there's a small delay after the key press
+           to check for a release */
+
         SDL_Event event;
+        tme_set_snd(4);
         while (1) {
-                while (SDL_PollEvent(&event)) {
-                        if (event.type != SDL_KEYDOWN)
-                                continue;
+                tme_update();
+                
+                while (SDL_PollEvent(&event))
+                        key_handle(&event);
 
-                        int key = key_handle(&event);
-
-                        /* another strange quirk, there's a small delay after the key press
-                           to check if there's a release, because it prevents spurious readings */
-
-                        /* TODO: introduce quirk */
-                        
-                        if (key != -1)
+                if (!tme_get_snd()) {
+                        if (!g_keys[key])
                                 return key;
+                        
+                        tme_set_snd(4);
                 }
+                        
         }
 }
 

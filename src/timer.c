@@ -49,9 +49,11 @@ tme_update(void)
                 if (g_delay_timer)
                         g_delay_timer--;
 
-                if (g_sound_timer)
+                if (g_sound_timer) {
+                        printf("BEEP\n");
                         g_sound_timer--;
-
+                }
+                        
                 g_last_tick = tick;
         }
 }
