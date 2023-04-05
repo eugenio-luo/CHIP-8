@@ -140,6 +140,9 @@ key_handle(SDL_Event *event)
         case SDL_SCANCODE_V:
                 g_keys[0xF] = (event->type == SDL_KEYDOWN) ? 1 : 0;
                 return 0xF;
+
+        case SDL_SCANCODE_H:
+                exit(1);
                 
         default:
                 return -1;

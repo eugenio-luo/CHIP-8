@@ -76,3 +76,9 @@ reg_set_idx(uint16_t addr)
 
         g_idx_reg = addr;
 }
+
+void
+reg_inc_idx(void)
+{
+        ++g_idx_reg;
+}

@@ -10,5 +10,6 @@ void reg_dec_pc(void);
 void reg_set_pc(uint16_t addr);
 uint16_t reg_get_idx(void);
 void reg_set_idx(uint16_t addr);
+void reg_inc_idx(void);
 
 #endif

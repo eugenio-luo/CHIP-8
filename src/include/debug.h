@@ -2,6 +2,7 @@
 #define _DEBUG_H
 
 void dbg_err(const char *format, ...);
+void dbg_log(const char *format, ...);
 void dbg_test(void);
 void dbg_test_init(void);
 void dbg_test_inst(void);

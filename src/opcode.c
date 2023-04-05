@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "opcode.h"
 #include "common.h"
@@ -142,6 +143,9 @@ op_or(void)
         reg_t reg1_val = reg_get(BX(g_opcode));
         reg_t reg2_val = reg_get(BY(g_opcode));
         reg_set(BX(g_opcode), reg1_val | reg2_val);
+
+        /* CHIP-8 quirk, flag register get reset by OR */
+        reg_set(FLAG_REG, 0);
 }
 
 static void
@@ -150,6 +154,9 @@ op_and(void)
         reg_t reg1_val = reg_get(BX(g_opcode));
         reg_t reg2_val = reg_get(BY(g_opcode));
         reg_set(BX(g_opcode), reg1_val & reg2_val);
+
+        /* CHIP-8 quirk, flag register get reset by AND */
+        reg_set(FLAG_REG, 0);
 }
 
 static void
@@ -158,6 +165,9 @@ op_xor(void)
         reg_t reg1_val = reg_get(BX(g_opcode));
         reg_t reg2_val = reg_get(BY(g_opcode));
         reg_set(BX(g_opcode), reg1_val ^ reg2_val);
+
+        /* CHIP-8 quirk, flag register get reset by XOR */
+        reg_set(FLAG_REG, 0);
 }
 
 static void
@@ -182,7 +192,10 @@ op_sub(void)
 static void
 op_shr(void)
 {
-        reg_t reg_val = reg_get(BX(g_opcode));
+        /* in the original CHIP-8 interpreter, it put the VY register value
+           in VX register, then shifted VX */
+        
+        reg_t reg_val = reg_get(BY(g_opcode));
         reg_set(BX(g_opcode), reg_val >> 1);
         reg_set(FLAG_REG, reg_val & 0x1);
 }
@@ -199,7 +212,10 @@ op_subn(void)
 static void
 op_shl(void)
 {
-        reg_t reg_val = reg_get(BX(g_opcode));
+        /* in the original CHIP-8 interpreter, it put the VY register value
+           in VX register, then shifted VX */
+        
+        reg_t reg_val = reg_get(BY(g_opcode));
         reg_set(BX(g_opcode), reg_val << 1);
         reg_set(FLAG_REG, (reg_val >> 7) & 0x1);
 }
@@ -245,12 +261,21 @@ op_drw(void)
         int limit = NIB(g_opcode);
         uint16_t addr = reg_get_idx();
 
+        usleep(18000);
+
         for (int i = 0; i < limit; ++i) {
                 int byte = mem_get(addr + i);
                 int y = (h + i) % SCREEN_HEIGHT; 
 
+                /* the original CHIP-8 clipped the sprites written outside of the screen
+                   instead of wrapping around */
+
+                if (h + i >= SCREEN_HEIGHT)
+                        break;
+                
                 for (int j = 0; j < 8; ++j) {
                         int x = (w + j) % SCREEN_WIDTH;
+
                         if (w + j >= SCREEN_WIDTH)
                                 break;
                         
@@ -343,8 +368,13 @@ op_ldir(void)
 {
         uint16_t addr = reg_get_idx();
 
-        for (int i = 0; i <= BX(g_opcode); ++i)
+        for (int i = 0; i <= BX(g_opcode); ++i) {
                 mem_set(addr + i, reg_get(i));
+
+                /* the correct behaviour is that the index 
+                   register is incremented too */
+                reg_inc_idx();
+        }
 }
 
 static void
@@ -352,8 +382,13 @@ op_ldri(void)
 {
         uint16_t addr = reg_get_idx();
         
-        for (int i = 0; i <= BX(g_opcode); ++i)
+        for (int i = 0; i <= BX(g_opcode); ++i) {
                 reg_set(i, mem_get(addr + i));
+
+                /* the correct behaviour is that the index 
+                   register is incremented too */
+                reg_inc_idx();
+        }
 }
 
 static void
@@ -471,10 +506,13 @@ static op_func_t main_func_table[] = {
 void
 op_nxt(void)
 {
+        /* the program counter should be incremented BEFORE executing the instruction */
+        
         g_opcode = op_read(reg_get_pc());
         reg_inc_pc();
+
+        dbg_log("executing: %x", g_opcode);
         op_exec();
-        dbg_show_regs();
 }
 
 void

@@ -9,6 +9,10 @@
 #define DP_HEIGHT      (SCREEN_HEIGHT * DP_MULT)
 #define DP_WIDTH       (SCREEN_WIDTH * DP_MULT)
 
+#define DEBUG_WIDTH      240
+#define DEBUG_LINES      10
+#define DEBUG_LINE_SIZE  30
+
 #define MCOLOR_R       0xFF
 #define MCOLOR_G       0xFF
 #define MCOLOR_B       0xFF

@@ -33,28 +33,43 @@
 static int err_code = 0;
 
 void
-dbg_err(const char *format, ...)
+dbg_err(const char *fmt, ...)
 {
 #ifdef TEST
 
-        (void) format;
+        (void) fmt;
         err_code = 1;
         
 #else 
         
-        va_list args;
-        va_start(args, format);
-
+        va_list args, copy;
+        va_start(args, fmt);
+        va_copy(copy, args);
+        
         fprintf(stderr, RED BOLD "ERROR: " RESET); 
-        vfprintf(stderr, format, args);
+        vfprintf(stderr, fmt, args);
         fprintf(stderr, "\n");
 
+        scr_add_dbg(fmt, copy);
+        
         dbg_show_regs();
         
         va_end(args);
+        va_end(copy);
         exit(1);
 
 #endif
+}
+
+void
+dbg_log(const char *fmt, ...)
+{
+        va_list args;
+        va_start(args, fmt);
+
+        scr_add_dbg(fmt, args);
+        
+        va_end(args);
 }
 
 void
