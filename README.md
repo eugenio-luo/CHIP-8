@@ -1,6 +1,6 @@
-# CHIP-8 emulator
+# CHIP-8 virtual machine
 
-It's an emulator for a CHIP-8 virtual machine
+It's a virtual machine for programs written in the CHIP-8 interpreted language
 
 ## How to compile and run
 
